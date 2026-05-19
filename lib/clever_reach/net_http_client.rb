@@ -87,8 +87,12 @@ module CleverReach
     def build_uri(path)
       base_url = @configuration.api_base_url.to_s.sub(%r{/+\z}, "")
       normalized_path = path.to_s.sub(%r{\A/+}, "")
+      uri = URI("#{base_url}/#{normalized_path}")
+      return uri if uri.is_a?(URI::HTTP) && uri.host
 
-      URI("#{base_url}/#{normalized_path}")
+      raise ConfigurationError, "API base URL must be an absolute HTTP or HTTPS URL"
+    rescue URI::InvalidURIError => e
+      raise ConfigurationError, "API base URL is invalid: #{e.message}"
     end
 
     def handle_response(response)

@@ -13,7 +13,7 @@ module CleverReach
     end
 
     def authenticate!
-      uri = URI(@configuration.auth_url)
+      uri = auth_uri
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = uri.scheme == "https"
       http.open_timeout = @configuration.open_timeout
@@ -48,6 +48,15 @@ module CleverReach
     end
 
     private
+
+    def auth_uri
+      uri = URI(@configuration.auth_url.to_s)
+      return uri if uri.is_a?(URI::HTTP) && uri.host
+
+      raise ConfigurationError, "Auth URL must be an absolute HTTP or HTTPS URL"
+    rescue URI::InvalidURIError => e
+      raise ConfigurationError, "Auth URL is invalid: #{e.message}"
+    end
 
     def handle_auth_response(response)
       puts "DEBUG: Auth response status: #{response.code}" if ENV["DEBUG"]

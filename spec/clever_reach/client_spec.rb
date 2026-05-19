@@ -113,6 +113,20 @@ RSpec.describe CleverReach::NetHttpClient do
       expect(client.get("/groups")).to eq([])
     end
 
+    it "raises ConfigurationError for relative API base URLs" do
+      client.configuration.api_base_url = "/v3"
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::ConfigurationError, "API base URL must be an absolute HTTP or HTTPS URL")
+    end
+
+    it "raises ConfigurationError for malformed API base URLs" do
+      client.configuration.api_base_url = "https://exa mple.test/v3"
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::ConfigurationError, /API base URL is invalid:/)
+    end
+
     it "normalizes trailing slashes in the configured API base URL" do
       client.configuration.api_base_url = "http://api.example.test/v3/"
 

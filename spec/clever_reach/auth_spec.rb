@@ -39,6 +39,20 @@ RSpec.describe CleverReach::Auth do
       expect(auth.token).to eq("custom")
     end
 
+    it "raises ConfigurationError for relative auth URLs" do
+      CleverReach.configuration.auth_url = "/oauth/token"
+
+      expect { auth.token }
+        .to raise_error(CleverReach::ConfigurationError, "Auth URL must be an absolute HTTP or HTTPS URL")
+    end
+
+    it "raises ConfigurationError for malformed auth URLs" do
+      CleverReach.configuration.auth_url = "https://exa mple.test/oauth/token"
+
+      expect { auth.token }
+        .to raise_error(CleverReach::ConfigurationError, /Auth URL is invalid:/)
+    end
+
     it "reuses a valid cached token" do
       stub_request(:post, token_url)
         .to_return(status: 200, body: { access_token: "cached", expires_in: 3600 }.to_json)
