@@ -15,7 +15,6 @@ Then run `bundle install`.
 Create an initializer file `config/initializers/clever_reach.rb`:
 
 ```ruby
-```ruby
 CleverReach.configure do |config|
   config.client_id = "your_valid_client_id"
   config.client_secret = "your_valid_client_secret"
@@ -24,7 +23,6 @@ end
 client = CleverReach.client
 groups = client.groups.all
 puts "Found #{groups.size} groups"
-```
 ```
 
 ## Environment Variables
@@ -47,9 +45,7 @@ Create a service object to handle CleverReach operations:
 # app/services/cleverreach_service.rb
 class CleverreachService
   def initialize
-  @client = CleverReach::NetHttpClient.new
-  # or use the convenience method:
-  # @client = CleverReach.client
+    @client = CleverReach.client
   end
 
   def sync_user_to_group(user, group_id)

@@ -1,4 +1,11 @@
 require "spec_helper"
+require "clever_reach/client"
+
+RSpec.describe CleverReach::Client do
+  it "keeps the legacy client constant usable without Faraday" do
+    expect(described_class).to be < CleverReach::NetHttpClient
+  end
+end
 
 RSpec.describe CleverReach::NetHttpClient do
   let(:client) { described_class.new }
@@ -55,6 +62,85 @@ RSpec.describe CleverReach::NetHttpClient do
 
     it "memoizes the recipients resource" do
       expect(client.recipients).to be(client.recipients)
+    end
+  end
+
+  describe "#get" do
+    before do
+      allow(client.auth).to receive(:token).and_return("test_token")
+    end
+
+    it "returns parsed JSON for successful responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .with(headers: { "Authorization" => "Bearer test_token" })
+        .to_return(
+          status: 200,
+          body: [{ id: 1, name: "Newsletter" }].to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+
+      expect(client.get("/groups")).to eq([{ "id" => 1, "name" => "Newsletter" }])
+    end
+
+    it "sends query params for GET requests" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups/1/receivers?page=2")
+        .to_return(status: 200, body: [].to_json)
+
+      client.get("/groups/1/receivers", page: 2)
+
+      expect(WebMock).to have_requested(:get, "https://rest.cleverreach.com/v3/groups/1/receivers?page=2")
+    end
+
+    it "raises ValidationError for 400 responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 400, body: { message: "Invalid request" }.to_json)
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::ValidationError, "Invalid request")
+    end
+
+    it "raises AuthenticationError for 401 responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 401, body: { error: "invalid_token" }.to_json)
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::AuthenticationError, "Unauthorized: invalid_token")
+    end
+
+    it "raises NotFoundError for 404 responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups/unknown")
+        .to_return(status: 404, body: { message: "Missing" }.to_json)
+
+      expect { client.get("/groups/unknown") }
+        .to raise_error(CleverReach::NotFoundError, "Resource not found: Missing")
+    end
+
+    it "raises RateLimitError for 429 responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 429, body: { message: "Slow down" }.to_json)
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::RateLimitError, "Rate limit exceeded: Slow down")
+    end
+
+    it "raises APIError with response details for other error responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 500, body: { message: "Server error" }.to_json)
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::APIError) { |error|
+          expect(error.message).to eq("API request failed: Server error")
+          expect(error.status_code).to eq(500)
+          expect(error.response_body).to eq({ message: "Server error" }.to_json)
+        }
+    end
+
+    it "raises APIError for invalid JSON success responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 200, body: "not json")
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::APIError, /Failed to parse response:/)
     end
   end
 end

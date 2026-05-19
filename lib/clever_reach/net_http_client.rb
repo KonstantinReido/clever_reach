@@ -75,7 +75,11 @@ module CleverReach
 
       response = http.request(request)
       handle_response(response)
-    rescue => e
+    rescue CleverReach::Error
+      raise
+    rescue JSON::ParserError => e
+      raise APIError, "Failed to parse response: #{e.message}"
+    rescue IOError, SystemCallError, Timeout::Error, SocketError, Net::OpenTimeout, Net::ReadTimeout => e
       raise APIError, "Request failed: #{e.message}"
     end
 

@@ -93,7 +93,7 @@ CleverReach.configure do |config|
   config.client_secret = "your_valid_client_secret"
 end
 
-client = CleverReach::Client.new
+client = CleverReach.client
 groups = client.groups.all
 puts "Found #{groups.size} groups"
 ```

@@ -7,7 +7,7 @@ A Ruby gem that provides a convenient wrapper for the CleverReach REST API using
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'clever_reach', path: 'vendor/gems/clever_reach'
+gem 'clever_reach'
 ```
 
 And then execute:
@@ -43,15 +43,17 @@ groups = client.groups.all
 group = client.groups.create(name: "My Group")
 
 # Get recipients from a group
-recipients = client.recipients.all(group_id: group_id)
+recipients = client.recipients.all(group_id)
 
 # Add a recipient to a group
 recipient = client.recipients.create(
-  group_id: group_id,
-  email: "user@example.com",
-  attributes: {
-    firstname: "John",
-    lastname: "Doe"
+  group_id,
+  {
+    email: "user@example.com",
+    attributes: {
+      firstname: "John",
+      lastname: "Doe"
+    }
   }
 )
 ```
@@ -76,7 +78,7 @@ end
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests.
+After checking out the repo, run `bundle install` to install dependencies. Then, run `rake spec` to run the tests.
 
 ## Contributing
 
