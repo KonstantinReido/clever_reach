@@ -113,6 +113,22 @@ RSpec.describe CleverReach::NetHttpClient do
       expect(client.get("/groups")).to eq([])
     end
 
+    it "normalizes trailing slashes in the configured API base URL" do
+      client.configuration.api_base_url = "http://api.example.test/v3/"
+
+      stub_request(:get, "http://api.example.test/v3/groups")
+        .to_return(status: 200, body: [].to_json)
+
+      expect(client.get("/groups")).to eq([])
+    end
+
+    it "accepts request paths without a leading slash" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 200, body: [].to_json)
+
+      expect(client.get("groups")).to eq([])
+    end
+
     it "raises ValidationError for 400 responses" do
       stub_request(:get, "https://rest.cleverreach.com/v3/groups")
         .to_return(status: 400, body: { message: "Invalid request" }.to_json)

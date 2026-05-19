@@ -3,6 +3,7 @@
 ### Fixed
 - Resolved "Forbidden: v3 token on lower version" API error by switching from Faraday to Net::HTTP
 - Fixed authentication and API call compatibility issues with CleverReach API
+- Normalized API base URL and request path joining to avoid double slashes
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

@@ -42,7 +42,7 @@ module CleverReach
     private
 
     def request(method, path, data = {})
-      uri = URI("#{@configuration.api_base_url}#{path}")
+      uri = build_uri(path)
       
       # Add query parameters for GET requests
       if method == :get && !data.empty?
@@ -82,6 +82,13 @@ module CleverReach
       raise APIError, "Failed to parse response: #{e.message}"
     rescue IOError, SystemCallError, Timeout::Error, SocketError, Net::OpenTimeout, Net::ReadTimeout => e
       raise APIError, "Request failed: #{e.message}"
+    end
+
+    def build_uri(path)
+      base_url = @configuration.api_base_url.to_s.sub(%r{/+\z}, "")
+      normalized_path = path.to_s.sub(%r{\A/+}, "")
+
+      URI("#{base_url}/#{normalized_path}")
     end
 
     def handle_response(response)
