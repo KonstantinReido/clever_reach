@@ -9,6 +9,7 @@ RSpec.describe CleverReach::Configuration do
       expect(config.auth_url).to eq("https://rest.cleverreach.com/oauth/token.php")
       expect(config.timeout).to eq(30)
       expect(config.open_timeout).to eq(30)
+      expect(config.user_agent).to eq("CleverReach Ruby Gem #{CleverReach::VERSION}")
     end
   end
 

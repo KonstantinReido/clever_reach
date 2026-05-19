@@ -72,7 +72,7 @@ module CleverReach
       end
 
       request['Authorization'] = "Bearer #{auth.token}"
-      request['User-Agent'] = "CleverReach Ruby Gem #{CleverReach::VERSION}"
+      request['User-Agent'] = @configuration.user_agent
 
       response = http.request(request)
       handle_response(response)

@@ -26,6 +26,7 @@ CleverReach.configure do |config|
   config.auth_url = "https://rest.cleverreach.com/oauth/token.php" # Optional, defaults to this
   config.timeout = 30 # Optional read timeout in seconds
   config.open_timeout = 30 # Optional connection timeout in seconds
+  config.user_agent = "My App" # Optional, defaults to "CleverReach Ruby Gem <version>"
 end
 ```
 

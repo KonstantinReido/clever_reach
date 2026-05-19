@@ -30,6 +30,16 @@ RSpec.describe CleverReach::Auth do
       expect(auth.expires_at).to be > Time.now
     end
 
+    it "uses the configured user agent" do
+      CleverReach.configuration.user_agent = "My App"
+
+      stub_request(:post, token_url)
+        .with(headers: { "User-Agent" => "My App" })
+        .to_return(status: 200, body: { access_token: "abc123", expires_in: 3600 }.to_json)
+
+      expect(auth.token).to eq("abc123")
+    end
+
     it "uses the configured auth URL" do
       CleverReach.configuration.auth_url = "https://auth.example.test/oauth/token"
 

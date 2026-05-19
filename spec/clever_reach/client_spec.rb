@@ -95,6 +95,16 @@ RSpec.describe CleverReach::NetHttpClient do
       expect(client.get("/groups")).to eq([{ "id" => 1, "name" => "Newsletter" }])
     end
 
+    it "uses the configured user agent" do
+      client.configuration.user_agent = "My App"
+
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .with(headers: { "User-Agent" => "My App" })
+        .to_return(status: 200, body: [].to_json)
+
+      expect(client.get("/groups")).to eq([])
+    end
+
     it "sends query params for GET requests" do
       stub_request(:get, "https://rest.cleverreach.com/v3/groups/1/receivers?page=2")
         .to_return(status: 200, body: [].to_json)

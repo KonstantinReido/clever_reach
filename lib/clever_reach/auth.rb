@@ -21,7 +21,7 @@ module CleverReach
 
       request = Net::HTTP::Post.new(uri)
       request['Content-Type'] = 'application/x-www-form-urlencoded'
-      request['User-Agent'] = "CleverReach Ruby Gem #{CleverReach::VERSION}"
+      request['User-Agent'] = @configuration.user_agent
       request.set_form_data({
         'grant_type' => 'client_credentials',
         'client_id' => @configuration.client_id,
