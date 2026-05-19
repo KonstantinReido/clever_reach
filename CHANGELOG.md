@@ -3,17 +3,21 @@
 ### Fixed
 - Resolved "Forbidden: v3 token on lower version" API error by switching from Faraday to Net::HTTP
 - Fixed authentication and API call compatibility issues with CleverReach API
+- Preserved documented status-specific errors instead of wrapping them as generic `APIError`
+- Escaped dynamic resource path segments before building API URLs
 - Normalized API base URL and request path joining to avoid double slashes
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`
 - Removed Faraday dependency in favor of standard library Net::HTTP for better compatibility
 - Updated all examples and documentation to use the new client
+- Kept `CleverReach::Client` as a compatibility subclass of `CleverReach::NetHttpClient`
 
 ### Added
 `CleverReach.client` convenience method for creating client instances
 - Enhanced error handling and debugging capabilities
 - Comprehensive troubleshooting documentation
+- Configurable OAuth token URL and connection timeout
 - CI matrix for supported Ruby versions
 
 ## [0.1.0] - 2025-08-22
