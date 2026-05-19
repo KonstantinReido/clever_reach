@@ -14,13 +14,13 @@ RSpec.describe CleverReach::NetHttpClient do
     context "with valid configuration" do
       it "initializes successfully" do
         expect(client).to be_a(described_class)
-  expect(client.auth).to be_a(CleverReach::Auth)
+        expect(client.auth).to be_a(CleverReach::Auth)
       end
     end
 
     context "without client_id" do
       before do
-  CleverReach.configure do |config|
+        CleverReach.configure do |config|
           config.client_id = nil
           config.client_secret = "test_secret"
         end
@@ -41,6 +41,19 @@ RSpec.describe CleverReach::NetHttpClient do
 
       it "raises ConfigurationError" do
         expect { described_class.new }.to raise_error(CleverReach::ConfigurationError, "Client Secret is required")
+      end
+    end
+
+    context "with blank credentials" do
+      before do
+        CleverReach.configure do |config|
+          config.client_id = " "
+          config.client_secret = "test_secret"
+        end
+      end
+
+      it "raises ConfigurationError" do
+        expect { described_class.new }.to raise_error(CleverReach::ConfigurationError, "Client ID is required")
       end
     end
   end
@@ -141,6 +154,60 @@ RSpec.describe CleverReach::NetHttpClient do
 
       expect { client.get("/groups") }
         .to raise_error(CleverReach::APIError, /Failed to parse response:/)
+    end
+  end
+
+  describe "#post" do
+    before do
+      allow(client.auth).to receive(:token).and_return("test_token")
+    end
+
+    it "sends JSON request bodies" do
+      stub_request(:post, "https://rest.cleverreach.com/v3/groups")
+        .with(
+          body: { name: "Newsletter" }.to_json,
+          headers: {
+            "Authorization" => "Bearer test_token",
+            "Content-Type" => "application/json"
+          }
+        )
+        .to_return(status: 201, body: { id: 1, name: "Newsletter" }.to_json)
+
+      expect(client.post("/groups", name: "Newsletter")).to eq({ "id" => 1, "name" => "Newsletter" })
+    end
+  end
+
+  describe "#put" do
+    before do
+      allow(client.auth).to receive(:token).and_return("test_token")
+    end
+
+    it "sends JSON request bodies" do
+      stub_request(:put, "https://rest.cleverreach.com/v3/groups/1")
+        .with(
+          body: { name: "Updated" }.to_json,
+          headers: {
+            "Authorization" => "Bearer test_token",
+            "Content-Type" => "application/json"
+          }
+        )
+        .to_return(status: 200, body: { id: 1, name: "Updated" }.to_json)
+
+      expect(client.put("/groups/1", name: "Updated")).to eq({ "id" => 1, "name" => "Updated" })
+    end
+  end
+
+  describe "#delete" do
+    before do
+      allow(client.auth).to receive(:token).and_return("test_token")
+    end
+
+    it "returns nil for successful empty responses" do
+      stub_request(:delete, "https://rest.cleverreach.com/v3/groups/1")
+        .with(headers: { "Authorization" => "Bearer test_token" })
+        .to_return(status: 204, body: "")
+
+      expect(client.delete("/groups/1")).to be_nil
     end
   end
 end

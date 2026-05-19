@@ -41,5 +41,16 @@ RSpec.describe CleverReach::Configuration do
         expect(config.valid?).to be false
       end
     end
+
+    context "when credentials are blank strings" do
+      before do
+        config.client_id = " "
+        config.client_secret = ""
+      end
+
+      it "returns false" do
+        expect(config.valid?).to be false
+      end
+    end
   end
 end

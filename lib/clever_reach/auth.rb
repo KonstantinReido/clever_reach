@@ -16,10 +16,11 @@ module CleverReach
       uri = URI("https://rest.cleverreach.com/oauth/token.php")
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
+      http.read_timeout = @configuration.timeout
 
       request = Net::HTTP::Post.new(uri)
       request['Content-Type'] = 'application/x-www-form-urlencoded'
-  request['User-Agent'] = "CleverReach Ruby Gem #{CleverReach::VERSION}"
+      request['User-Agent'] = "CleverReach Ruby Gem #{CleverReach::VERSION}"
       request.set_form_data({
         'grant_type' => 'client_credentials',
         'client_id' => @configuration.client_id,
@@ -28,7 +29,11 @@ module CleverReach
 
       response = http.request(request)
       handle_auth_response(response)
-    rescue => e
+    rescue CleverReach::Error
+      raise
+    rescue JSON::ParserError => e
+      raise AuthenticationError, "Failed to parse authentication response: #{e.message}"
+    rescue IOError, SystemCallError, Timeout::Error, SocketError, Net::OpenTimeout, Net::ReadTimeout => e
       raise AuthenticationError, "Failed to authenticate: #{e.message}"
     end
 
@@ -45,7 +50,6 @@ module CleverReach
 
     def handle_auth_response(response)
       puts "DEBUG: Auth response status: #{response.code}" if ENV["DEBUG"]
-      puts "DEBUG: Auth response body: #{response.body}" if ENV["DEBUG"]
       
       if response.code == '200'
         data = JSON.parse(response.body)

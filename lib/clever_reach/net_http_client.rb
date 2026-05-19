@@ -7,10 +7,10 @@ module CleverReach
     attr_reader :configuration, :auth
 
     def initialize(configuration = nil)
-  @configuration = configuration || CleverReach.configuration
+      @configuration = configuration || CleverReach.configuration
       
-      raise ConfigurationError, "Client ID is required" unless @configuration.client_id
-      raise ConfigurationError, "Client Secret is required" unless @configuration.client_secret
+      raise ConfigurationError, "Client ID is required" if blank?(@configuration.client_id)
+      raise ConfigurationError, "Client Secret is required" if blank?(@configuration.client_secret)
       
       @auth = Auth.new(@configuration)
     end
@@ -71,7 +71,7 @@ module CleverReach
       end
 
       request['Authorization'] = "Bearer #{auth.token}"
-  request['User-Agent'] = "CleverReach Ruby Gem #{CleverReach::VERSION}"
+      request['User-Agent'] = "CleverReach Ruby Gem #{CleverReach::VERSION}"
 
       response = http.request(request)
       handle_response(response)
@@ -117,6 +117,10 @@ module CleverReach
       end
     rescue JSON::ParserError
       response.body
+    end
+
+    def blank?(value)
+      value.to_s.strip.empty?
     end
   end
 end

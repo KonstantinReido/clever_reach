@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   # Specify which files should be added to the gem when it is released.
   spec.files = Dir.chdir(__dir__) do
     `git ls-files -z 2>/dev/null`.split("\x0").reject do |f|
-      (File.expand_path(f) == __FILE__) || f.start_with?(*%w[bin/ debug/ test/ spec/ features/ .git .circleci appveyor])
+      (File.expand_path(f) == __FILE__) || f.start_with?(*%w[bin/ debug/ test/ spec/ features/ .git .github .circleci appveyor])
     end
   end
   spec.bindir = "exe"

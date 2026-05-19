@@ -8,7 +8,13 @@ module CleverReach
     end
 
     def valid?
-      !client_id.nil? && !client_id.empty? && !client_secret.nil? && !client_secret.empty?
+      present?(client_id) && present?(client_secret)
+    end
+
+    private
+
+    def present?(value)
+      !value.to_s.strip.empty?
     end
   end
 end
