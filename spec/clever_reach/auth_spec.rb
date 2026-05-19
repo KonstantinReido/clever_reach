@@ -77,5 +77,21 @@ RSpec.describe CleverReach::Auth do
       expect { auth.token }
         .to raise_error(CleverReach::AuthenticationError, /Failed to parse authentication response:/)
     end
+
+    it "raises AuthenticationError when a success response omits the access token" do
+      stub_request(:post, token_url)
+        .to_return(status: 200, body: { expires_in: 3600 }.to_json)
+
+      expect { auth.token }
+        .to raise_error(CleverReach::AuthenticationError, "Authentication response did not include an access token")
+    end
+
+    it "raises AuthenticationError when a success response has a blank access token" do
+      stub_request(:post, token_url)
+        .to_return(status: 200, body: { access_token: " ", expires_in: 3600 }.to_json)
+
+      expect { auth.token }
+        .to raise_error(CleverReach::AuthenticationError, "Authentication response did not include an access token")
+    end
   end
 end

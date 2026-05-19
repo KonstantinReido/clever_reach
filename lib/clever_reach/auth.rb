@@ -55,6 +55,8 @@ module CleverReach
       if response.code == '200'
         data = JSON.parse(response.body)
         @access_token = data["access_token"]
+        raise AuthenticationError, "Authentication response did not include an access token" if @access_token.to_s.strip.empty?
+
         expires_in = data["expires_in"]&.to_i || 3600
         @expires_at = Time.now + expires_in - 60 # Refresh 1 minute early
         puts "DEBUG: Auth successful, token expires at #{@expires_at}" if ENV["DEBUG"]
