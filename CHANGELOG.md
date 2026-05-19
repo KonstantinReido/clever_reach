@@ -14,6 +14,7 @@
 `CleverReach.client` convenience method for creating client instances
 - Enhanced error handling and debugging capabilities
 - Comprehensive troubleshooting documentation
+- CI matrix for supported Ruby versions
 
 ## [0.1.0] - 2025-08-22
 
