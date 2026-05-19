@@ -6,7 +6,9 @@ RSpec.describe CleverReach::Configuration do
   describe "#initialize" do
     it "sets default values" do
       expect(config.api_base_url).to eq("https://rest.cleverreach.com/v3")
+      expect(config.auth_url).to eq("https://rest.cleverreach.com/oauth/token.php")
       expect(config.timeout).to eq(30)
+      expect(config.open_timeout).to eq(30)
     end
   end
 

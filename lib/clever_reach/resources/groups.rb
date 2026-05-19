@@ -8,7 +8,7 @@ module CleverReach
 
       # Get a specific group by ID
       def find(group_id)
-        get("/groups/#{group_id}")
+        get("/groups/#{path_segment(group_id)}")
       end
 
       # Create a new group
@@ -18,37 +18,37 @@ module CleverReach
 
       # Update a group
       def update(group_id, attributes = {})
-        put("/groups/#{group_id}", attributes)
+        put("/groups/#{path_segment(group_id)}", attributes)
       end
 
       # Delete a group
       def destroy(group_id)
-        delete("/groups/#{group_id}")
+        delete("/groups/#{path_segment(group_id)}")
       end
 
       # Get group statistics
       def stats(group_id)
-        get("/groups/#{group_id}/stats")
+        get("/groups/#{path_segment(group_id)}/stats")
       end
 
       # Get group attributes/fields
       def attributes(group_id)
-        get("/groups/#{group_id}/attributes")
+        get("/groups/#{path_segment(group_id)}/attributes")
       end
 
       # Create a new group attribute
       def create_attribute(group_id, attribute_data)
-        post("/groups/#{group_id}/attributes", attribute_data)
+        post("/groups/#{path_segment(group_id)}/attributes", attribute_data)
       end
 
       # Update a group attribute
       def update_attribute(group_id, attribute_id, attribute_data)
-        put("/groups/#{group_id}/attributes/#{attribute_id}", attribute_data)
+        put("/groups/#{path_segment(group_id)}/attributes/#{path_segment(attribute_id)}", attribute_data)
       end
 
       # Delete a group attribute
       def destroy_attribute(group_id, attribute_id)
-        delete("/groups/#{group_id}/attributes/#{attribute_id}")
+        delete("/groups/#{path_segment(group_id)}/attributes/#{path_segment(attribute_id)}")
       end
     end
   end

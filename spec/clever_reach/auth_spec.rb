@@ -30,6 +30,15 @@ RSpec.describe CleverReach::Auth do
       expect(auth.expires_at).to be > Time.now
     end
 
+    it "uses the configured auth URL" do
+      CleverReach.configuration.auth_url = "https://auth.example.test/oauth/token"
+
+      stub_request(:post, "https://auth.example.test/oauth/token")
+        .to_return(status: 200, body: { access_token: "custom", expires_in: 3600 }.to_json)
+
+      expect(auth.token).to eq("custom")
+    end
+
     it "reuses a valid cached token" do
       stub_request(:post, token_url)
         .to_return(status: 200, body: { access_token: "cached", expires_in: 3600 }.to_json)

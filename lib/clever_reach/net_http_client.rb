@@ -50,7 +50,8 @@ module CleverReach
       end
 
       http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
+      http.use_ssl = uri.scheme == "https"
+      http.open_timeout = @configuration.open_timeout
       http.read_timeout = @configuration.timeout
 
       request = case method

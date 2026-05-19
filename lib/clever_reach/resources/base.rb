@@ -1,3 +1,5 @@
+require "uri"
+
 module CleverReach
   module Resources
     class Base
@@ -23,6 +25,10 @@ module CleverReach
 
       def delete(path)
         client.delete(path)
+      end
+
+      def path_segment(value)
+        URI.encode_www_form_component(value.to_s).gsub("+", "%20")
       end
     end
   end

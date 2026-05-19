@@ -17,6 +17,14 @@ RSpec.describe CleverReach::Resources::Recipients do
     expect(resource.find(123, 456)).to eq({ "id" => 456 })
   end
 
+  it "escapes group and recipient path IDs" do
+    expect(client).to receive(:get)
+      .with("/groups/group%201/receivers/user%40example.com%2Fprimary", {})
+      .and_return({ "email" => "user@example.com" })
+
+    expect(resource.find("group 1", "user@example.com/primary")).to eq({ "email" => "user@example.com" })
+  end
+
   it "searches recipients" do
     expect(client).to receive(:get)
       .with("/groups/123/receivers/filter", { page: 2, query: "user@example.com" })

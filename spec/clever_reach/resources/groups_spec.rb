@@ -17,6 +17,12 @@ RSpec.describe CleverReach::Resources::Groups do
     expect(resource.find(123)).to eq({ "id" => 123 })
   end
 
+  it "escapes path IDs" do
+    expect(client).to receive(:get).with("/groups/group%201%2F2", {}).and_return({ "id" => "group 1/2" })
+
+    expect(resource.find("group 1/2")).to eq({ "id" => "group 1/2" })
+  end
+
   it "creates a group" do
     attributes = { name: "Newsletter" }
 
