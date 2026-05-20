@@ -284,4 +284,11 @@ RSpec.describe CleverReach::NetHttpClient do
       expect(client.delete("/groups/1")).to be_nil
     end
   end
+
+  describe "unsupported HTTP methods" do
+    it "raises APIError" do
+      expect { client.send(:request, :patch, "/groups/1") }
+        .to raise_error(CleverReach::APIError, "Unsupported HTTP method: patch")
+    end
+  end
 end

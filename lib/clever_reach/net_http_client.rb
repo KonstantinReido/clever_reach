@@ -66,6 +66,8 @@ module CleverReach
         req
       when :delete
         Net::HTTP::Delete.new(uri.request_uri)
+      else
+        raise APIError, "Unsupported HTTP method: #{method}"
       end
 
       request['Authorization'] = "Bearer #{auth.token}"

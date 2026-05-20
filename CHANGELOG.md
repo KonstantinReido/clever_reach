@@ -10,6 +10,7 @@
 - Treated whitespace-only successful response bodies as empty responses
 - Preserved existing request query parameters when adding GET params
 - Parsed `error_description` fields from API and authentication error responses
+- Raised a clear `APIError` for unsupported internal HTTP methods
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`
