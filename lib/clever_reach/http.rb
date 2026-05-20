@@ -1,5 +1,6 @@
 require "net/http"
 require "uri"
+require_relative "errors"
 
 module CleverReach
   module HTTP

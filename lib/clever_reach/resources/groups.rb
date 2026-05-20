@@ -1,3 +1,5 @@
+require_relative "base"
+
 module CleverReach
   module Resources
     class Groups < Base

@@ -1,9 +1,12 @@
 require "net/http"
-require "uri"
 require "json"
+require_relative "auth"
+require_relative "configuration"
 require_relative "errors"
 require_relative "error_parser"
 require_relative "http"
+require_relative "resources/groups"
+require_relative "resources/recipients"
 
 module CleverReach
   class NetHttpClient

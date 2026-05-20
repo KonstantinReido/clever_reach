@@ -3,11 +3,11 @@ require_relative "clever_reach/configuration"
 require_relative "clever_reach/errors"
 require_relative "clever_reach/error_parser"
 require_relative "clever_reach/http"
-require_relative "clever_reach/net_http_client"
 require_relative "clever_reach/auth"
 require_relative "clever_reach/resources/base"
 require_relative "clever_reach/resources/groups"
 require_relative "clever_reach/resources/recipients"
+require_relative "clever_reach/net_http_client"
 
 module CleverReach
   class << self

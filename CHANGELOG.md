@@ -17,6 +17,7 @@
 - Shared URL validation and Net::HTTP setup between authentication and API clients
 - Added configurable clock for deterministic token expiry checks
 - Centralized resource path construction and escaping in `Resources::Base`
+- Made internal files more self-sufficient with explicit relative requires
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`
