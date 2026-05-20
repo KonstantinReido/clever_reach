@@ -7,6 +7,7 @@
 - Escaped dynamic resource path segments before building API URLs
 - Normalized API base URL and request path joining to avoid double slashes
 - Removed direct debug output from authentication request handling
+- Treated whitespace-only successful response bodies as empty responses
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

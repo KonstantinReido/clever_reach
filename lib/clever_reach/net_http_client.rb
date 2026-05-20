@@ -98,7 +98,7 @@ module CleverReach
     def handle_response(response)
       case response.code.to_i
       when 200..299
-        JSON.parse(response.body) if response.body && !response.body.empty?
+        JSON.parse(response.body) unless blank?(response.body)
       when 400
         raise ValidationError, parse_error_message(response)
       when 401

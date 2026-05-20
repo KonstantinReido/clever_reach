@@ -95,6 +95,13 @@ RSpec.describe CleverReach::NetHttpClient do
       expect(client.get("/groups")).to eq([{ "id" => 1, "name" => "Newsletter" }])
     end
 
+    it "returns nil for successful whitespace-only responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 200, body: " \n\t")
+
+      expect(client.get("/groups")).to be_nil
+    end
+
     it "uses the configured user agent" do
       client.configuration.user_agent = "My App"
 
