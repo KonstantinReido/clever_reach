@@ -27,6 +27,10 @@ module CleverReach
         client.delete(path)
       end
 
+      def resource_path(*segments)
+        "/#{segments.map { |segment| path_segment(segment) }.join("/")}"
+      end
+
       def path_segment(value)
         URI.encode_www_form_component(value.to_s).gsub("+", "%20")
       end
