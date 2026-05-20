@@ -63,7 +63,28 @@ recipient = client.recipients.create(
     }
   }
 )
+
+# Work with global attributes
+attributes = client.attributes.all
+client.attributes.create(name: "customer_id", type: "text")
+
+# Manage blacklist entries
+client.blacklist.create(email: "blocked@example.com")
+valid_emails = client.blacklist.validate(emails: ["user@example.com"])
+
+# Use filters and batch receiver operations
+filters = client.groups.filters(group_id)
+client.recipients.batch_upsert(group_id, [
+  { email: "user@example.com", registered: Time.now.to_i }
+])
+
+# Work with mailings and reports
+mailings = client.mailings.all(state: "draft")
+client.mailings.send_preview(mailing_id, email: "preview@example.com")
+report_stats = client.reports.stats(report_id, "daily")
 ```
+
+See [docs/api_coverage.md](docs/api_coverage.md) for the full CleverReach REST API v3 endpoint coverage map.
 
 ### Error Handling
 
