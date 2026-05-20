@@ -3,7 +3,7 @@ require "spec_helper"
 RSpec.describe CleverReach do
   describe ".configuration" do
     it "returns a Configuration object" do
-  expect(described_class.configuration).to be_a(CleverReach::Configuration)
+      expect(described_class.configuration).to be_a(CleverReach::Configuration)
     end
   end
 
@@ -32,6 +32,22 @@ RSpec.describe CleverReach do
       described_class.reset_configuration!
       expect(described_class.configuration.client_id).to be_nil
       expect(described_class.configuration.api_base_url).to eq("https://rest.cleverreach.com/v3")
+    end
+  end
+
+  describe ".client" do
+    it "returns a NetHttpClient" do
+      expect(described_class.client).to be_a(CleverReach::NetHttpClient)
+    end
+
+    it "accepts an explicit configuration" do
+      configuration = CleverReach::Configuration.new
+      configuration.client_id = "custom_id"
+      configuration.client_secret = "custom_secret"
+
+      client = described_class.client(configuration)
+
+      expect(client.configuration).to be(configuration)
     end
   end
 end

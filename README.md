@@ -39,6 +39,8 @@ end
 client = CleverReach::NetHttpClient.new
 # or use the convenience method
 client = CleverReach.client
+# or pass an explicit configuration
+client = CleverReach.client(custom_configuration)
 
 # Get all groups
 groups = client.groups.all

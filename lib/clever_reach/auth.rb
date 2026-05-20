@@ -59,8 +59,6 @@ module CleverReach
     end
 
     def handle_auth_response(response)
-      puts "DEBUG: Auth response status: #{response.code}" if ENV["DEBUG"]
-      
       if response.code == '200'
         data = JSON.parse(response.body)
         @access_token = data["access_token"]
@@ -68,7 +66,6 @@ module CleverReach
 
         expires_in = data["expires_in"]&.to_i || 3600
         @expires_at = Time.now + expires_in - 60 # Refresh 1 minute early
-        puts "DEBUG: Auth successful, token expires at #{@expires_at}" if ENV["DEBUG"]
       else
         error_msg = "Authentication failed with status #{response.code}"
         error_msg += ": #{response.body}" if response.body

@@ -24,8 +24,8 @@ module CleverReach
     end
 
     # Create a client using Net::HTTP (more compatible)
-    def client
-      NetHttpClient.new
+    def client(configuration = nil)
+      NetHttpClient.new(configuration)
     end
   end
 end

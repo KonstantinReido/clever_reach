@@ -6,6 +6,7 @@
 - Preserved documented status-specific errors instead of wrapping them as generic `APIError`
 - Escaped dynamic resource path segments before building API URLs
 - Normalized API base URL and request path joining to avoid double slashes
+- Removed direct debug output from authentication request handling
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`
@@ -19,6 +20,7 @@
 - Comprehensive troubleshooting documentation
 - Configurable OAuth token URL and connection timeout
 - CI matrix for supported Ruby versions
+- Optional explicit configuration argument for `CleverReach.client`
 
 ## [0.1.0] - 2025-08-22
 
