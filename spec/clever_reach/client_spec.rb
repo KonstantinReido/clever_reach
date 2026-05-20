@@ -202,6 +202,14 @@ RSpec.describe CleverReach::NetHttpClient do
         .to raise_error(CleverReach::NotFoundError, "Resource not found: Missing")
     end
 
+    it "uses the status code for whitespace-only error responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups/unknown")
+        .to_return(status: 404, body: " \n")
+
+      expect { client.get("/groups/unknown") }
+        .to raise_error(CleverReach::NotFoundError, "Resource not found: HTTP 404")
+    end
+
     it "raises RateLimitError for 429 responses" do
       stub_request(:get, "https://rest.cleverreach.com/v3/groups")
         .to_return(status: 429, body: { message: "Slow down" }.to_json)

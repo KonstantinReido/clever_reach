@@ -122,7 +122,7 @@ module CleverReach
     end
 
     def parse_error_message(response)
-      if response.body && !response.body.empty?
+      if !blank?(response.body)
         data = JSON.parse(response.body)
         if data.is_a?(Hash)
           data["message"] || data["error_description"] || data["error"] || response.body

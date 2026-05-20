@@ -11,6 +11,7 @@
 - Preserved existing request query parameters when adding GET params
 - Parsed `error_description` fields from API and authentication error responses
 - Raised a clear `APIError` for unsupported internal HTTP methods
+- Used HTTP status fallback messages for whitespace-only error response bodies
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`
