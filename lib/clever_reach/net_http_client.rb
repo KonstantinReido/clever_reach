@@ -44,10 +44,7 @@ module CleverReach
     def request(method, path, data = {})
       uri = build_uri(path)
       
-      # Add query parameters for GET requests
-      if method == :get && !data.empty?
-        uri.query = URI.encode_www_form(data)
-      end
+      add_query_params(uri, data) if method == :get && !data.empty?
 
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = uri.scheme == "https"
@@ -93,6 +90,12 @@ module CleverReach
       raise ConfigurationError, "API base URL must be an absolute HTTP or HTTPS URL"
     rescue URI::InvalidURIError => e
       raise ConfigurationError, "API base URL is invalid: #{e.message}"
+    end
+
+    def add_query_params(uri, params)
+      query_params = URI.decode_www_form(uri.query.to_s)
+      query_params.concat(params.map { |key, value| [key, value] })
+      uri.query = URI.encode_www_form(query_params)
     end
 
     def handle_response(response)

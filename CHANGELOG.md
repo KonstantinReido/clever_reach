@@ -8,6 +8,7 @@
 - Normalized API base URL and request path joining to avoid double slashes
 - Removed direct debug output from authentication request handling
 - Treated whitespace-only successful response bodies as empty responses
+- Preserved existing request query parameters when adding GET params
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

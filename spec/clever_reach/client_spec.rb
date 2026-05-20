@@ -121,6 +121,16 @@ RSpec.describe CleverReach::NetHttpClient do
       expect(WebMock).to have_requested(:get, "https://rest.cleverreach.com/v3/groups/1/receivers?page=2")
     end
 
+    it "preserves existing query params when adding GET params" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups/1/receivers?active=true&page=2")
+        .to_return(status: 200, body: [].to_json)
+
+      client.get("/groups/1/receivers?active=true", page: 2)
+
+      expect(WebMock)
+        .to have_requested(:get, "https://rest.cleverreach.com/v3/groups/1/receivers?active=true&page=2")
+    end
+
     it "uses the configured API base URL" do
       client.configuration.api_base_url = "http://api.example.test/v3"
 
