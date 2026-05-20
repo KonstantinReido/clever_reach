@@ -23,8 +23,8 @@ module CleverReach
         client.put(path, data)
       end
 
-      def delete(path)
-        client.delete(path)
+      def delete(path, params = {})
+        params.empty? ? client.delete(path) : client.delete(path, params)
       end
 
       def resource_path(*segments)

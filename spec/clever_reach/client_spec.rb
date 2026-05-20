@@ -68,6 +68,28 @@ RSpec.describe CleverReach::NetHttpClient do
     end
   end
 
+  describe "resources" do
+    it "returns and memoizes resource objects" do
+      resource_expectations = {
+        attributes: CleverReach::Resources::Attributes,
+        blacklist: CleverReach::Resources::Blacklist,
+        bounces: CleverReach::Resources::Bounces,
+        clients: CleverReach::Resources::Clients,
+        debug: CleverReach::Resources::Debug,
+        forms: CleverReach::Resources::Forms,
+        mailings: CleverReach::Resources::Mailings,
+        my_content: CleverReach::Resources::MyContent,
+        oauth: CleverReach::Resources::Oauth,
+        reports: CleverReach::Resources::Reports
+      }
+
+      resource_expectations.each do |method_name, resource_class|
+        expect(client.public_send(method_name)).to be_a(resource_class)
+        expect(client.public_send(method_name)).to be(client.public_send(method_name))
+      end
+    end
+  end
+
   describe "#recipients" do
     it "returns a Recipients resource" do
       expect(client.recipients).to be_a(CleverReach::Resources::Recipients)
@@ -290,6 +312,15 @@ RSpec.describe CleverReach::NetHttpClient do
         .to_return(status: 204, body: "")
 
       expect(client.delete("/groups/1")).to be_nil
+    end
+
+    it "sends query params for DELETE requests" do
+      stub_request(:delete, "https://rest.cleverreach.com/v3/receivers/456?group_id=123")
+        .to_return(status: 204, body: "")
+
+      client.delete("/receivers/456", group_id: 123)
+
+      expect(WebMock).to have_requested(:delete, "https://rest.cleverreach.com/v3/receivers/456?group_id=123")
     end
   end
 

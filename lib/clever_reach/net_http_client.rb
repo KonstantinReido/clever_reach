@@ -5,8 +5,18 @@ require_relative "configuration"
 require_relative "errors"
 require_relative "error_parser"
 require_relative "http"
+require_relative "resources/attributes"
+require_relative "resources/blacklist"
+require_relative "resources/bounces"
+require_relative "resources/clients"
+require_relative "resources/debug"
+require_relative "resources/forms"
 require_relative "resources/groups"
+require_relative "resources/mailings"
+require_relative "resources/my_content"
+require_relative "resources/oauth"
 require_relative "resources/recipients"
+require_relative "resources/reports"
 
 module CleverReach
   class NetHttpClient
@@ -25,8 +35,48 @@ module CleverReach
       @groups ||= Resources::Groups.new(self)
     end
 
+    def attributes
+      @attributes ||= Resources::Attributes.new(self)
+    end
+
+    def blacklist
+      @blacklist ||= Resources::Blacklist.new(self)
+    end
+
+    def bounces
+      @bounces ||= Resources::Bounces.new(self)
+    end
+
+    def clients
+      @clients ||= Resources::Clients.new(self)
+    end
+
+    def debug
+      @debug ||= Resources::Debug.new(self)
+    end
+
+    def forms
+      @forms ||= Resources::Forms.new(self)
+    end
+
+    def mailings
+      @mailings ||= Resources::Mailings.new(self)
+    end
+
+    def my_content
+      @my_content ||= Resources::MyContent.new(self)
+    end
+
+    def oauth
+      @oauth ||= Resources::Oauth.new(self)
+    end
+
     def recipients
       @recipients ||= Resources::Recipients.new(self)
+    end
+
+    def reports
+      @reports ||= Resources::Reports.new(self)
     end
 
     def get(path, params = {})
@@ -41,8 +91,8 @@ module CleverReach
       request(:put, path, data)
     end
 
-    def delete(path)
-      request(:delete, path)
+    def delete(path, params = {})
+      request(:delete, path, params)
     end
 
     private
@@ -50,7 +100,7 @@ module CleverReach
     def request(method, path, data = {})
       uri = build_uri(path)
       
-      add_query_params(uri, data) if method == :get && !data.empty?
+      add_query_params(uri, data) if [:get, :delete].include?(method) && !data.empty?
 
       http = build_http(uri)
       request = build_request(method, uri, data)
