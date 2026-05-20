@@ -69,13 +69,9 @@ class CleverreachService
     nil
   end
 
-  def unsubscribe_user(user, group_id)
-    recipients = @client.recipients.search(group_id, user.email)
-    
-    if recipients.any?
-      recipient = recipients.first
-      @client.recipients.unsubscribe(group_id, recipient['id'])
-    end
+  def remove_user_from_group(user, group_id)
+    receiver = @client.recipients.find_global(user.email, group_id: group_id)
+    @client.recipients.destroy(group_id, receiver["id"])
   rescue CleverReach::NotFoundError
     # User not found in group, which is fine
     true

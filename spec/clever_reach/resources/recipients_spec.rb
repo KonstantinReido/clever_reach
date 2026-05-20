@@ -33,14 +33,6 @@ RSpec.describe CleverReach::Resources::Recipients do
     expect(resource.find("group 1", "user@example.com/primary")).to eq({ "email" => "user@example.com" })
   end
 
-  it "searches recipients" do
-    expect(client).to receive(:get)
-      .with("/groups/123/receivers/filter", { page: 2, query: "user@example.com" })
-      .and_return([])
-
-    expect(resource.search(123, "user@example.com", page: 2)).to eq([])
-  end
-
   it "creates and batch creates recipients" do
     recipient_data = { email: "user@example.com" }
     batch_data = [recipient_data]
@@ -72,28 +64,22 @@ RSpec.describe CleverReach::Resources::Recipients do
     expect(resource.destroy(123, 456)).to be_nil
   end
 
-  it "updates subscription status" do
-    expect(client).to receive(:post).with("/groups/123/receivers/456/unsubscribe", {}).and_return(nil)
-    expect(client).to receive(:post).with("/groups/123/receivers/456/subscribe", {}).and_return(nil)
+  it "updates activation status" do
     expect(client).to receive(:put).with("/groups/123/receivers/456/activate", {}).and_return(nil)
     expect(client).to receive(:put).with("/groups/123/receivers/456/deactivate", {}).and_return(nil)
 
-    expect(resource.unsubscribe(123, 456)).to be_nil
-    expect(resource.resubscribe(123, 456)).to be_nil
     expect(resource.activate(123, 456)).to be_nil
     expect(resource.deactivate(123, 456)).to be_nil
   end
 
-  it "fetches events and triggers double opt-in" do
+  it "fetches and creates events" do
     options = { source: "signup" }
 
     expect(client).to receive(:get).with("/groups/123/receivers/456/events", { page: 2 }).and_return([])
     expect(client).to receive(:post).with("/groups/123/receivers/456/events", options).and_return(options)
-    expect(client).to receive(:post).with("/groups/123/receivers/456/sendactivationmail", options).and_return(nil)
 
     expect(resource.events(123, 456, page: 2)).to eq([])
     expect(resource.create_event(123, 456, options)).to eq(options)
-    expect(resource.trigger_double_opt_in(123, 456, options)).to be_nil
   end
 
   it "updates attributes and manages orders within a group" do

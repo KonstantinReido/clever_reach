@@ -190,17 +190,6 @@ The gem already exposed wrappers for:
 | `PUT /receivers/{pool_id}/orders/{id}` | `client.recipients.update_global_order(recipient_id, order_id, order_data)` |
 | `DELETE /receivers/{pool_id}/orders/{id}` | `client.recipients.destroy_global_order(recipient_id, order_id)` |
 
-## Partially Implemented or Non-Swagger Legacy Methods
-
-These methods existed before this pass and are retained for compatibility, but the exact endpoints are not present in the current Swagger document:
-
-| Method | Path | Notes |
-| --- | --- | --- |
-| `client.recipients.search(group_id, query, params = {})` | `GET /groups/{group_id}/receivers/filter` | Current Swagger exposes runtime filtering as `POST /receivers/filter` and group receiver filtering through `GET /groups/{group_id}/filters/{filter_id}/receivers`. |
-| `client.recipients.unsubscribe(group_id, recipient_id)` | `POST /groups/{group_id}/receivers/{id}/unsubscribe` | Not present in the current Swagger receiver paths. |
-| `client.recipients.resubscribe(group_id, recipient_id)` | `POST /groups/{group_id}/receivers/{id}/subscribe` | Not present in the current Swagger receiver paths. |
-| `client.recipients.trigger_double_opt_in(group_id, recipient_id, options = {})` | `POST /groups/{group_id}/receivers/{id}/sendactivationmail` | Not present in the current Swagger receiver paths. |
-
 ## Inconsistencies Found
 
 | Area | Finding | Resolution |

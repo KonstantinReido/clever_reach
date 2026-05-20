@@ -18,11 +18,6 @@ module CleverReach
         get(resource_path("groups", group_id, "receivers", recipient_id))
       end
 
-      # Search recipients in a group
-      def search(group_id, query, params = {})
-        get(resource_path("groups", group_id, "receivers", "filter"), params.merge(query: query))
-      end
-
       # Create/add a recipient to a group
       def create(group_id, recipient_data)
         post(resource_path("groups", group_id, "receivers"), recipient_data)
@@ -68,16 +63,6 @@ module CleverReach
         delete(resource_path("groups", group_id, "receivers", recipient_id))
       end
 
-      # Unsubscribe a recipient
-      def unsubscribe(group_id, recipient_id)
-        post(resource_path("groups", group_id, "receivers", recipient_id, "unsubscribe"))
-      end
-
-      # Resubscribe a recipient
-      def resubscribe(group_id, recipient_id)
-        post(resource_path("groups", group_id, "receivers", recipient_id, "subscribe"))
-      end
-
       # Set recipient as active
       def activate(group_id, recipient_id)
         put(resource_path("groups", group_id, "receivers", recipient_id, "activate"))
@@ -121,11 +106,6 @@ module CleverReach
       # Delete an order for a recipient within a group
       def destroy_order(group_id, recipient_id, order_id)
         delete(resource_path("groups", group_id, "receivers", recipient_id, "orders", order_id))
-      end
-
-      # Trigger a double opt-in email
-      def trigger_double_opt_in(group_id, recipient_id, options = {})
-        post(resource_path("groups", group_id, "receivers", recipient_id, "sendactivationmail"), options)
       end
 
       # Get a receiver by global pool ID or email.
