@@ -12,6 +12,8 @@
 - Parsed `error_description` fields from API and authentication error responses
 - Raised a clear `APIError` for unsupported internal HTTP methods
 - Used HTTP status fallback messages for whitespace-only error response bodies
+- Shared API error-body parsing between authentication and API responses
+- Split Net::HTTP request construction into smaller internal helpers
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

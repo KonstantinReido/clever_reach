@@ -46,29 +46,8 @@ module CleverReach
       
       add_query_params(uri, data) if method == :get && !data.empty?
 
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = uri.scheme == "https"
-      http.open_timeout = @configuration.open_timeout
-      http.read_timeout = @configuration.timeout
-
-      request = case method
-      when :get
-        Net::HTTP::Get.new(uri.request_uri)
-      when :post
-        req = Net::HTTP::Post.new(uri.request_uri)
-        req.body = data.to_json
-        req['Content-Type'] = 'application/json'
-        req
-      when :put
-        req = Net::HTTP::Put.new(uri.request_uri)
-        req.body = data.to_json
-        req['Content-Type'] = 'application/json'
-        req
-      when :delete
-        Net::HTTP::Delete.new(uri.request_uri)
-      else
-        raise APIError, "Unsupported HTTP method: #{method}"
-      end
+      http = build_http(uri)
+      request = build_request(method, uri, data)
 
       request['Authorization'] = "Bearer #{auth.token}"
       request['User-Agent'] = @configuration.user_agent
@@ -100,6 +79,35 @@ module CleverReach
       uri.query = URI.encode_www_form(query_params)
     end
 
+    def build_http(uri)
+      Net::HTTP.new(uri.host, uri.port).tap do |http|
+        http.use_ssl = uri.scheme == "https"
+        http.open_timeout = @configuration.open_timeout
+        http.read_timeout = @configuration.timeout
+      end
+    end
+
+    def build_request(method, uri, data)
+      case method
+      when :get
+        Net::HTTP::Get.new(uri.request_uri)
+      when :post
+        json_request(Net::HTTP::Post.new(uri.request_uri), data)
+      when :put
+        json_request(Net::HTTP::Put.new(uri.request_uri), data)
+      when :delete
+        Net::HTTP::Delete.new(uri.request_uri)
+      else
+        raise APIError, "Unsupported HTTP method: #{method}"
+      end
+    end
+
+    def json_request(request, data)
+      request.body = data.to_json
+      request['Content-Type'] = 'application/json'
+      request
+    end
+
     def handle_response(response)
       case response.code.to_i
       when 200..299
@@ -122,18 +130,7 @@ module CleverReach
     end
 
     def parse_error_message(response)
-      if !blank?(response.body)
-        data = JSON.parse(response.body)
-        if data.is_a?(Hash)
-          data["message"] || data["error_description"] || data["error"] || response.body
-        else
-          response.body
-        end
-      else
-        "HTTP #{response.code}"
-      end
-    rescue JSON::ParserError
-      response.body
+      ErrorParser.message(response.body, "HTTP #{response.code}")
     end
 
     def blank?(value)
