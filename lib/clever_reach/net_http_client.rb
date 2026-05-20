@@ -123,7 +123,7 @@ module CleverReach
       if response.body && !response.body.empty?
         data = JSON.parse(response.body)
         if data.is_a?(Hash)
-          data["message"] || data["error"] || response.body
+          data["message"] || data["error_description"] || data["error"] || response.body
         else
           response.body
         end

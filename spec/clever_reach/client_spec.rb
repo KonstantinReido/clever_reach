@@ -178,6 +178,14 @@ RSpec.describe CleverReach::NetHttpClient do
         .to raise_error(CleverReach::ValidationError, "Invalid request")
     end
 
+    it "uses error descriptions from API error responses" do
+      stub_request(:get, "https://rest.cleverreach.com/v3/groups")
+        .to_return(status: 400, body: { error_description: "Detailed validation failure" }.to_json)
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::ValidationError, "Detailed validation failure")
+    end
+
     it "raises AuthenticationError for 401 responses" do
       stub_request(:get, "https://rest.cleverreach.com/v3/groups")
         .to_return(status: 401, body: { error: "invalid_token" }.to_json)

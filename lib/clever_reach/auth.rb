@@ -68,9 +68,21 @@ module CleverReach
         @expires_at = Time.now + expires_in - 60 # Refresh 1 minute early
       else
         error_msg = "Authentication failed with status #{response.code}"
-        error_msg += ": #{response.body}" if response.body
+        message = parse_error_message(response)
+        error_msg += ": #{message}" unless message.to_s.strip.empty?
         raise AuthenticationError, error_msg
       end
+    end
+
+    def parse_error_message(response)
+      return "" if response.body.to_s.strip.empty?
+
+      data = JSON.parse(response.body)
+      return data["message"] || data["error_description"] || data["error"] || response.body if data.is_a?(Hash)
+
+      response.body
+    rescue JSON::ParserError
+      response.body
     end
   end
 end

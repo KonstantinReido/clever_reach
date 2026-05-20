@@ -9,6 +9,7 @@
 - Removed direct debug output from authentication request handling
 - Treated whitespace-only successful response bodies as empty responses
 - Preserved existing request query parameters when adding GET params
+- Parsed `error_description` fields from API and authentication error responses
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

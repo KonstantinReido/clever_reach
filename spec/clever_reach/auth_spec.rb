@@ -91,7 +91,15 @@ RSpec.describe CleverReach::Auth do
         .to_return(status: 401, body: { error: "invalid_client" }.to_json)
 
       expect { auth.token }
-        .to raise_error(CleverReach::AuthenticationError, /Authentication failed with status 401/)
+        .to raise_error(CleverReach::AuthenticationError, "Authentication failed with status 401: invalid_client")
+    end
+
+    it "uses error descriptions from failed authentication responses" do
+      stub_request(:post, token_url)
+        .to_return(status: 401, body: { error_description: "Credentials are invalid" }.to_json)
+
+      expect { auth.token }
+        .to raise_error(CleverReach::AuthenticationError, "Authentication failed with status 401: Credentials are invalid")
     end
 
     it "raises AuthenticationError for invalid JSON success responses" do
