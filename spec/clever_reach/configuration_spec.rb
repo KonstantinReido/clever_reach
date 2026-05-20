@@ -10,6 +10,7 @@ RSpec.describe CleverReach::Configuration do
       expect(config.timeout).to eq(30)
       expect(config.open_timeout).to eq(30)
       expect(config.user_agent).to eq("CleverReach Ruby Gem #{CleverReach::VERSION}")
+      expect(config.clock.call).to be_a(Time)
     end
   end
 

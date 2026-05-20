@@ -16,10 +16,7 @@ module CleverReach
 
     def authenticate!
       uri = auth_uri
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = uri.scheme == "https"
-      http.open_timeout = @configuration.open_timeout
-      http.read_timeout = @configuration.timeout
+      http = HTTP.connection(uri, @configuration)
 
       request = Net::HTTP::Post.new(uri)
       request['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -41,7 +38,7 @@ module CleverReach
     end
 
     def valid_token?
-      @access_token && @expires_at && Time.now < @expires_at
+      @access_token && @expires_at && current_time < @expires_at
     end
 
     def token
@@ -62,13 +59,17 @@ module CleverReach
         raise AuthenticationError, "Authentication response did not include an access token" if @access_token.to_s.strip.empty?
 
         expires_in = data["expires_in"]&.to_i || 3600
-        @expires_at = Time.now + expires_in - 60 # Refresh 1 minute early
+        @expires_at = current_time + expires_in - 60 # Refresh 1 minute early
       else
         error_msg = "Authentication failed with status #{response.code}"
         message = ErrorParser.message(response.body)
         error_msg += ": #{message}" unless message.to_s.strip.empty?
         raise AuthenticationError, error_msg
       end
+    end
+
+    def current_time
+      @configuration.clock.call
     end
   end
 end

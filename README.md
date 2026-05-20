@@ -27,6 +27,7 @@ CleverReach.configure do |config|
   config.timeout = 30 # Optional read timeout in seconds
   config.open_timeout = 30 # Optional connection timeout in seconds
   config.user_agent = "My App" # Optional, defaults to "CleverReach Ruby Gem <version>"
+  config.clock = -> { Time.now } # Optional, used for token expiry checks
 end
 ```
 

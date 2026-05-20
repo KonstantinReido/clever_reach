@@ -4,9 +4,12 @@ RSpec.describe CleverReach::Auth do
   subject(:auth) { described_class.new(CleverReach.configuration) }
 
   let(:token_url) { "https://rest.cleverreach.com/oauth/token.php" }
+  let(:now) { Time.utc(2026, 5, 20, 12, 0, 0) }
 
   describe "#token" do
     it "requests a client credentials token" do
+      CleverReach.configuration.clock = -> { now }
+
       stub_request(:post, token_url)
         .with(
           body: {
@@ -27,7 +30,7 @@ RSpec.describe CleverReach::Auth do
 
       expect(auth.token).to eq("abc123")
       expect(auth.access_token).to eq("abc123")
-      expect(auth.expires_at).to be > Time.now
+      expect(auth.expires_at).to eq(now + 3540)
     end
 
     it "uses the configured user agent" do
@@ -64,23 +67,31 @@ RSpec.describe CleverReach::Auth do
     end
 
     it "reuses a valid cached token" do
+      current_time = now
+      CleverReach.configuration.clock = -> { current_time }
+
       stub_request(:post, token_url)
         .to_return(status: 200, body: { access_token: "cached", expires_in: 3600 }.to_json)
 
       expect(auth.token).to eq("cached")
+      current_time = now + 3500
       expect(auth.token).to eq("cached")
 
       expect(WebMock).to have_requested(:post, token_url).once
     end
 
     it "refreshes an expired token" do
+      current_time = now
+      CleverReach.configuration.clock = -> { current_time }
+
       stub_request(:post, token_url)
         .to_return(
-          { status: 200, body: { access_token: "first", expires_in: 1 }.to_json },
+          { status: 200, body: { access_token: "first", expires_in: 3600 }.to_json },
           { status: 200, body: { access_token: "second", expires_in: 3600 }.to_json }
         )
 
       expect(auth.token).to eq("first")
+      current_time = now + 3541
       expect(auth.token).to eq("second")
 
       expect(WebMock).to have_requested(:post, token_url).twice

@@ -15,6 +15,7 @@
 - Shared API error-body parsing between authentication and API responses
 - Split Net::HTTP request construction into smaller internal helpers
 - Shared URL validation and Net::HTTP setup between authentication and API clients
+- Added configurable clock for deterministic token expiry checks
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

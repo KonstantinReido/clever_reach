@@ -1,6 +1,6 @@
 module CleverReach
   class Configuration
-    attr_accessor :client_id, :client_secret, :api_base_url, :auth_url, :timeout, :open_timeout, :user_agent
+    attr_accessor :client_id, :client_secret, :api_base_url, :auth_url, :timeout, :open_timeout, :user_agent, :clock
 
     def initialize
       @api_base_url = "https://rest.cleverreach.com/v3"
@@ -8,6 +8,7 @@ module CleverReach
       @timeout = 30
       @open_timeout = 30
       @user_agent = "CleverReach Ruby Gem #{CleverReach::VERSION}"
+      @clock = -> { Time.now }
     end
 
     def valid?
