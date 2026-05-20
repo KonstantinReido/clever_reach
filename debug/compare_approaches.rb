@@ -10,6 +10,7 @@ client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
 client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
 auth_url = ENV.fetch("CLEVER_REACH_AUTH_URL", "https://rest.cleverreach.com/oauth/token.php")
 api_base_url = ENV.fetch("CLEVER_REACH_API_BASE_URL", "https://rest.cleverreach.com/v3")
+user_agent = ENV.fetch("CLEVER_REACH_DEBUG_USER_AGENT", "CleverReach Ruby Gem Debug")
 
 def post_client_credentials(auth_url, client_id, client_secret)
   uri = URI(auth_url)
@@ -46,7 +47,7 @@ manual_auth_response = post_client_credentials(auth_url, client_id, client_secre
 puts "Manual auth status: #{manual_auth_response.code}"
 
 manual_token = JSON.parse(manual_auth_response.body).fetch("access_token")
-manual_api_response = get_groups(api_base_url, manual_token, "CleverReach Ruby Debug")
+manual_api_response = get_groups(api_base_url, manual_token, user_agent)
 puts "Manual groups status: #{manual_api_response.code}"
 
 CleverReach.configure do |config|
@@ -54,6 +55,7 @@ CleverReach.configure do |config|
   config.client_secret = client_secret
   config.api_base_url = api_base_url
   config.auth_url = auth_url
+  config.user_agent = user_agent
 end
 
 client = CleverReach::Client.new

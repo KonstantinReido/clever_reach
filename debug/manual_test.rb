@@ -9,6 +9,7 @@ client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
 client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
 auth_url = ENV.fetch("CLEVER_REACH_AUTH_URL", "https://rest.cleverreach.com/oauth/token.php")
 api_base_url = ENV.fetch("CLEVER_REACH_API_BASE_URL", "https://rest.cleverreach.com/v3")
+user_agent = ENV.fetch("CLEVER_REACH_DEBUG_USER_AGENT", "CleverReach Ruby Gem Debug")
 
 puts "CleverReach manual OAuth test"
 puts "=" * 40
@@ -19,7 +20,7 @@ http.use_ssl = auth_uri.scheme == "https"
 
 request = Net::HTTP::Post.new(auth_uri)
 request["Content-Type"] = "application/x-www-form-urlencoded"
-request["User-Agent"] = "CleverReach Ruby Gem Debug"
+request["User-Agent"] = user_agent
 request.set_form_data(
   "grant_type" => "client_credentials",
   "client_id" => client_id,
@@ -45,7 +46,7 @@ api_http.use_ssl = api_uri.scheme == "https"
 
 api_request = Net::HTTP::Get.new(api_uri)
 api_request["Authorization"] = "Bearer #{token}"
-api_request["User-Agent"] = "CleverReach Ruby Gem Debug"
+api_request["User-Agent"] = user_agent
 
 api_response = api_http.request(api_request)
 puts "Groups API status: #{api_response.code}"

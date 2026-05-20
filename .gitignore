@@ -15,9 +15,14 @@
 .env.*
 !.env.example
 debug/.env
+debug/*.env
 debug/*.local.rb
 debug/*.secret.rb
 debug/*.secrets.rb
+debug/*.log
+debug/*.dump
+debug/*.json
+debug/*.response
 
 # Ignore Byebug command history file.
 .byebug_history
