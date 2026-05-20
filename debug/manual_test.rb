@@ -1,101 +1,52 @@
 #!/usr/bin/env ruby
-# Test script to verify CleverReach OAuth credentials manually
+# Test CleverReach OAuth credentials manually with Net::HTTP.
 
-require 'net/http'
-require 'uri'
-require 'json'
+require "json"
+require "net/http"
+require "uri"
 
-puts "CleverReach OAuth Token Test"
+client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
+client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
+auth_url = ENV.fetch("CLEVER_REACH_AUTH_URL", "https://rest.cleverreach.com/oauth/token.php")
+api_base_url = ENV.fetch("CLEVER_REACH_API_BASE_URL", "https://rest.cleverreach.com/v3")
+
+puts "CleverReach manual OAuth test"
 puts "=" * 40
 
-# Get credentials from environment or prompt
-client_id = ENV['CLEVERREACH_CLIENT_ID'] || begin
-  print "Enter your Client ID: "
-  gets.chomp
-end
+auth_uri = URI(auth_url)
+http = Net::HTTP.new(auth_uri.host, auth_uri.port)
+http.use_ssl = auth_uri.scheme == "https"
 
-client_secret = ENV['CLEVERREACH_CLIENT_SECRET'] || begin
-  print "Enter your Client Secret: "
-  gets.chomp
-end
+request = Net::HTTP::Post.new(auth_uri)
+request["Content-Type"] = "application/x-www-form-urlencoded"
+request["User-Agent"] = "CleverReach Ruby Gem Debug"
+request.set_form_data(
+  "grant_type" => "client_credentials",
+  "client_id" => client_id,
+  "client_secret" => client_secret
+)
 
-if client_id.empty? || client_secret.empty?
-  puts "❌ Client ID and Client Secret are required"
+auth_response = http.request(request)
+puts "OAuth status: #{auth_response.code}"
+
+unless auth_response.code == "200"
+  puts "OAuth failed. Check the credentials and OAuth app configuration."
   exit 1
 end
 
-puts "\n🔑 Testing credentials..."
-puts "Client ID: #{client_id[0..8]}..."
-puts "Base URL: https://rest.cleverreach.com/oauth/token.php"
+data = JSON.parse(auth_response.body)
+token = data.fetch("access_token")
+puts "OAuth token received: #{!token.empty?}"
+puts "Expires in: #{data["expires_in"]} seconds" if data["expires_in"]
 
-# Manual HTTP request to test OAuth
-uri = URI('https://rest.cleverreach.com/oauth/token.php')
-http = Net::HTTP.new(uri.host, uri.port)
-http.use_ssl = true
+api_uri = URI.join("#{api_base_url}/", "groups")
+api_http = Net::HTTP.new(api_uri.host, api_uri.port)
+api_http.use_ssl = api_uri.scheme == "https"
 
-request = Net::HTTP::Post.new(uri)
-request['Content-Type'] = 'application/x-www-form-urlencoded'
-request['User-Agent'] = 'CleverReach Ruby Gem Test'
-request.set_form_data({
-  'grant_type' => 'client_credentials',
-  'client_id' => client_id,
-  'client_secret' => client_secret
-})
+api_request = Net::HTTP::Get.new(api_uri)
+api_request["Authorization"] = "Bearer #{token}"
+api_request["User-Agent"] = "CleverReach Ruby Gem Debug"
 
-puts "\n📤 Sending OAuth request..."
-
-begin
-  response = http.request(request)
-  
-  puts "\n📥 Response received:"
-  puts "Status: #{response.code}"
-  puts "Headers: #{response.to_hash}"
-  puts "Body: #{response.body}"
-  
-  if response.code == '200'
-    data = JSON.parse(response.body)
-    if data['access_token']
-      puts "\n✅ SUCCESS! OAuth token received"
-      puts "Token: #{data['access_token'][0..20]}..."
-      puts "Expires in: #{data['expires_in']} seconds"
-      
-      # Test API call with the token
-      puts "\n🧪 Testing API call with token..."
-      api_uri = URI('https://rest.cleverreach.com/v3/groups')
-      api_http = Net::HTTP.new(api_uri.host, api_uri.port)
-      api_http.use_ssl = true
-      
-      api_request = Net::HTTP::Get.new(api_uri)
-      api_request['Authorization'] = "Bearer #{data['access_token']}"
-  api_request['User-Agent'] = 'CleverReach Ruby Gem Test'
-      
-      api_response = api_http.request(api_request)
-      puts "API Status: #{api_response.code}"
-      puts "API Body: #{api_response.body[0..200]}#{api_response.body.length > 200 ? '...' : ''}"
-      
-      if api_response.code == '200'
-        puts "✅ API call successful!"
-      else
-        puts "❌ API call failed - check your account permissions"
-      end
-    else
-      puts "❌ No access token in response"
-    end
-  else
-    puts "❌ OAuth failed with status #{response.code}"
-    puts "This usually means:"
-    puts "- Wrong Client ID or Client Secret"
-    puts "- OAuth app not properly configured"
-    puts "- Account doesn't have API access"
-  end
-  
-rescue => e
-  puts "❌ Error: #{e.message}"
-  puts "Check your internet connection and API credentials"
-end
-
-puts "\n" + "=" * 40
-puts "If OAuth works but API calls fail, check:"
-puts "1. Your CleverReach account has v3 API access"
-puts "2. Your OAuth app has the necessary scopes"
-puts "3. Try different API base URLs (eu1, us1, etc.)"
+api_response = api_http.request(api_request)
+puts "Groups API status: #{api_response.code}"
+puts "Groups API returned bytes: #{api_response.body.to_s.bytesize}"

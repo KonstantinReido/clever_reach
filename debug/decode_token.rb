@@ -1,41 +1,44 @@
 #!/usr/bin/env ruby
-# Decode JWT to understand the token structure
+# Decode a JWT supplied via CLEVER_REACH_TOKEN without printing the raw token.
 
-require 'json'
-require 'base64'
+require "base64"
+require "json"
 
-token = "***REMOVED***"
+token = ENV.fetch("CLEVER_REACH_TOKEN")
 
-puts "🔍 JWT Token Analysis"
-puts "=" * 30
+def decode_part(part)
+  Base64.urlsafe_decode64(part + ("=" * ((4 - part.length % 4) % 4)))
+end
 
-# Split JWT parts
-header, payload, signature = token.split('.')
+def redact_claims(value)
+  case value
+  when Hash
+    value.each_with_object({}) do |(key, item), redacted|
+      redacted[key] = key.to_s.match?(/token|secret|password|credential|key/i) ? "[REDACTED]" : redact_claims(item)
+    end
+  when Array
+    value.map { |item| redact_claims(item) }
+  else
+    value
+  end
+end
 
-# Decode header
-puts "\n📝 Header:"
-header_decoded = JSON.parse(Base64.decode64(header + '=='))
-puts JSON.pretty_generate(header_decoded)
+header, payload, = token.split(".")
+raise "CLEVER_REACH_TOKEN does not look like a JWT" unless header && payload
 
-# Decode payload  
-puts "\n📝 Payload:"
-payload_decoded = JSON.parse(Base64.decode64(payload + '=='))
-puts JSON.pretty_generate(payload_decoded)
+header_decoded = JSON.parse(decode_part(header))
+payload_decoded = JSON.parse(decode_part(payload))
 
-puts "\n🔍 Key observations:"
-puts "- Shard: #{payload_decoded['shard']}"
-puts "- Zone: #{payload_decoded['zone']}"
-puts "- Scopes: #{payload_decoded['scopes']}"
-puts "- Issuer: #{payload_decoded['iss']}"
+puts "JWT header:"
+puts JSON.pretty_generate(redact_claims(header_decoded))
 
-puts "\n💡 The token indicates:"
-puts "- Your account is on shard16, zone 4"
-puts "- The issuer is 'rest.cleverreach.com' (not shard-specific)"
-puts "- You have all necessary OAuth scopes"
+puts
+puts "JWT payload:"
+puts JSON.pretty_generate(redact_claims(payload_decoded))
 
-puts "\n🤔 Possible issue:"
-puts "The error 'v3 token on lower version' might mean the API expects"
-puts "requests to be made to the correct shard endpoint, even though"
-puts "the manual approach with the main endpoint works."
-
-puts "\nLet's try different API base URLs..."
+puts
+puts "Summary:"
+puts "- Shard: #{payload_decoded["shard"]}" if payload_decoded.key?("shard")
+puts "- Zone: #{payload_decoded["zone"]}" if payload_decoded.key?("zone")
+puts "- Scopes: #{payload_decoded["scopes"]}" if payload_decoded.key?("scopes")
+puts "- Issuer: #{payload_decoded["iss"]}" if payload_decoded.key?("iss")

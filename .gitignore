@@ -12,6 +12,12 @@
 
 # Used by dotenv library to load environment variables.
 .env
+.env.*
+!.env.example
+debug/.env
+debug/*.local.rb
+debug/*.secret.rb
+debug/*.secrets.rb
 
 # Ignore Byebug command history file.
 .byebug_history

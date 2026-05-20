@@ -1,56 +1,34 @@
 #!/usr/bin/env ruby
-# Test User-Agent sensitivity
+# Test whether CleverReach responses vary by User-Agent.
 
-require 'faraday'
-require 'net/http'
-require 'uri'
+require "faraday"
+require "net/http"
+require "uri"
 
-token = "***REMOVED***"
+token = ENV.fetch("CLEVER_REACH_TOKEN")
+api_base_url = ENV.fetch("CLEVER_REACH_API_BASE_URL", "https://rest.cleverreach.com/v3")
 
-puts "🕵️  User-Agent Investigation"
+puts "User-Agent investigation"
 puts "=" * 35
 
-# Test 1: Net::HTTP (we know this works)
-puts "\n1️⃣  Net::HTTP (working approach):"
-uri = URI('https://rest.cleverreach.com/v3/groups')
+uri = URI.join("#{api_base_url}/", "groups")
 http = Net::HTTP.new(uri.host, uri.port)
-http.use_ssl = true
+http.use_ssl = uri.scheme == "https"
 request = Net::HTTP::Get.new(uri)
-request['Authorization'] = "Bearer #{token}"
+request["Authorization"] = "Bearer #{token}"
 response = http.request(request)
-puts "Status: #{response.code}"
-puts "User-Agent sent: #{request['User-Agent'] || 'none'}"
+puts "Net::HTTP default User-Agent status: #{response.code}"
+puts "Net::HTTP User-Agent header: #{request["User-Agent"] || "none"}"
 
-# Test 2: Faraday with no User-Agent
-puts "\n2️⃣  Faraday with no User-Agent:"
-conn = Faraday.new(url: 'https://rest.cleverreach.com/v3')
-response = conn.get('/groups') do |req|
-  req.headers['Authorization'] = "Bearer #{token}"
+[
+  ["Faraday without User-Agent", nil],
+  ["Faraday with Ruby User-Agent", "Ruby"],
+  ["Faraday with curl User-Agent", "curl/7.68.0"]
+].each do |label, user_agent|
+  conn = Faraday.new(url: api_base_url)
+  faraday_response = conn.get("/groups") do |req|
+    req.headers["Authorization"] = "Bearer #{token}"
+    req.headers["User-Agent"] = user_agent if user_agent
+  end
+  puts "#{label}: #{faraday_response.status}"
 end
-puts "Status: #{response.status}"
-
-# Test 3: Faraday with Net::HTTP-like User-Agent
-puts "\n3️⃣  Faraday with Ruby User-Agent:"
-conn = Faraday.new(url: 'https://rest.cleverreach.com/v3')
-response = conn.get('/groups') do |req|
-  req.headers['Authorization'] = "Bearer #{token}"
-  req.headers['User-Agent'] = "Ruby"
-end
-puts "Status: #{response.status}"
-
-# Test 4: Faraday with curl-like User-Agent
-puts "\n4️⃣  Faraday with curl User-Agent:"
-conn = Faraday.new(url: 'https://rest.cleverreach.com/v3')
-response = conn.get('/groups') do |req|
-  req.headers['Authorization'] = "Bearer #{token}"
-  req.headers['User-Agent'] = "curl/7.68.0"
-end
-puts "Status: #{response.status}"
-
-# Test 5: Check what headers Net::HTTP actually sends
-puts "\n5️⃣  Analyzing Net::HTTP headers..."
-puts "Checking what headers Net::HTTP sends vs Faraday..."
-
-# Let's capture the actual request
-require 'webrick'
-puts "Net::HTTP default User-Agent: #{Net::HTTP.new('example.com').send(:transport_request, Net::HTTP::Get.new('/'), nil)&.[]('User-Agent') rescue 'unknown'}"

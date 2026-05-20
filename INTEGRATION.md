@@ -16,8 +16,8 @@ Create an initializer file `config/initializers/clever_reach.rb`:
 
 ```ruby
 CleverReach.configure do |config|
-  config.client_id = "your_valid_client_id"
-  config.client_secret = "your_valid_client_secret"
+  config.client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
+  config.client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
 end
 
 client = CleverReach.client
@@ -27,13 +27,13 @@ puts "Found #{groups.size} groups"
 
 ## Environment Variables
 
-Alternatively, you can use environment variables:
+Use environment variables for local, staging, and production credentials:
 
 ```ruby
 # config/initializers/clever_reach.rb
 CleverReach.configure do |config|
-  config.client_id = ENV['CLEVERREACH_CLIENT_ID']
-  config.client_secret = ENV['CLEVERREACH_CLIENT_SECRET']
+  config.client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
+  config.client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
 end
 ```
 

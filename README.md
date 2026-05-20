@@ -16,12 +16,12 @@ And then execute:
 
 ## Configuration
 
-Configure the gem with your CleverReach API credentials:
+Configure the gem with your CleverReach API credentials from environment variables:
 
 ```ruby
 CleverReach.configure do |config|
-  config.client_id = "your_client_id"
-  config.client_secret = "your_client_secret"
+  config.client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
+  config.client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
   config.api_base_url = "https://rest.cleverreach.com/v3" # Optional, defaults to this
   config.auth_url = "https://rest.cleverreach.com/oauth/token.php" # Optional, defaults to this
   config.timeout = 30 # Optional read timeout in seconds

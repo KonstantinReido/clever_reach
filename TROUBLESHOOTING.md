@@ -69,8 +69,8 @@ If you get authentication working but API calls fail with version errors:
 ```ruby
 # Try with different base URLs
 CleverReach.configure do |config|
-  config.client_id = "your_client_id"
-  config.client_secret = "your_client_secret"
+  config.client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
+  config.client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
   # Try these alternatives if the default doesn't work:
   # config.api_base_url = "https://rest.cleverreach.com/v2"
   # config.api_base_url = "https://eu1.rest.cleverreach.com/v3"
@@ -89,8 +89,8 @@ Once you have valid credentials:
 
 ```ruby
 CleverReach.configure do |config|
-  config.client_id = "your_valid_client_id"
-  config.client_secret = "your_valid_client_secret"
+  config.client_id = ENV.fetch("CLEVER_REACH_CLIENT_ID")
+  config.client_secret = ENV.fetch("CLEVER_REACH_CLIENT_SECRET")
 end
 
 client = CleverReach.client
