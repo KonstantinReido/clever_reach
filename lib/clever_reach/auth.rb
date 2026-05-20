@@ -1,6 +1,8 @@
 require "net/http"
-require "uri"
 require "json"
+require_relative "errors"
+require_relative "error_parser"
+require_relative "http"
 
 module CleverReach
   class Auth
@@ -50,12 +52,7 @@ module CleverReach
     private
 
     def auth_uri
-      uri = URI(@configuration.auth_url.to_s)
-      return uri if uri.is_a?(URI::HTTP) && uri.host
-
-      raise ConfigurationError, "Auth URL must be an absolute HTTP or HTTPS URL"
-    rescue URI::InvalidURIError => e
-      raise ConfigurationError, "Auth URL is invalid: #{e.message}"
+      HTTP.absolute_uri(@configuration.auth_url, label: "Auth URL")
     end
 
     def handle_auth_response(response)

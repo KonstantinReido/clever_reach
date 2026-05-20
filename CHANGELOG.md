@@ -14,6 +14,7 @@
 - Used HTTP status fallback messages for whitespace-only error response bodies
 - Shared API error-body parsing between authentication and API responses
 - Split Net::HTTP request construction into smaller internal helpers
+- Shared URL validation and Net::HTTP setup between authentication and API clients
 
 ### Changed
 **BREAKING**: Replaced `CleverReach::Client` with `CleverReach::NetHttpClient`

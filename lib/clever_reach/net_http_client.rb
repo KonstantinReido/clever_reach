@@ -1,6 +1,9 @@
 require "net/http"
 require "uri"
 require "json"
+require_relative "errors"
+require_relative "error_parser"
+require_relative "http"
 
 module CleverReach
   class NetHttpClient
@@ -63,14 +66,7 @@ module CleverReach
     end
 
     def build_uri(path)
-      base_url = @configuration.api_base_url.to_s.sub(%r{/+\z}, "")
-      normalized_path = path.to_s.sub(%r{\A/+}, "")
-      uri = URI("#{base_url}/#{normalized_path}")
-      return uri if uri.is_a?(URI::HTTP) && uri.host
-
-      raise ConfigurationError, "API base URL must be an absolute HTTP or HTTPS URL"
-    rescue URI::InvalidURIError => e
-      raise ConfigurationError, "API base URL is invalid: #{e.message}"
+      HTTP.uri_for(@configuration.api_base_url, path, label: "API base URL")
     end
 
     def add_query_params(uri, params)
@@ -80,11 +76,7 @@ module CleverReach
     end
 
     def build_http(uri)
-      Net::HTTP.new(uri.host, uri.port).tap do |http|
-        http.use_ssl = uri.scheme == "https"
-        http.open_timeout = @configuration.open_timeout
-        http.read_timeout = @configuration.timeout
-      end
+      HTTP.connection(uri, @configuration)
     end
 
     def build_request(method, uri, data)
