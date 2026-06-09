@@ -27,6 +27,16 @@ RSpec.describe CleverReach::HTTP do
 
       expect(uri.to_s).to eq("https://example.test/v3/groups")
     end
+
+    it "raises ConfigurationError when base URLs include query parameters" do
+      expect { described_class.uri_for("https://example.test/v3?region=eu", "/groups", label: "API base URL") }
+        .to raise_error(CleverReach::ConfigurationError, "API base URL must not include query parameters or fragments")
+    end
+
+    it "raises ConfigurationError when base URLs include fragments" do
+      expect { described_class.uri_for("https://example.test/v3#groups", "/groups", label: "API base URL") }
+        .to raise_error(CleverReach::ConfigurationError, "API base URL must not include query parameters or fragments")
+    end
   end
 
   describe ".connection" do

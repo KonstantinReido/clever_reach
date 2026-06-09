@@ -176,6 +176,13 @@ RSpec.describe CleverReach::NetHttpClient do
         .to raise_error(CleverReach::ConfigurationError, /API base URL is invalid:/)
     end
 
+    it "raises ConfigurationError for API base URLs with query params" do
+      client.configuration.api_base_url = "https://api.example.test/v3?region=eu"
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::ConfigurationError, "API base URL must not include query parameters or fragments")
+    end
+
     it "normalizes trailing slashes in the configured API base URL" do
       client.configuration.api_base_url = "http://api.example.test/v3/"
 

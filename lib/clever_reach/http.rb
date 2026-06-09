@@ -16,7 +16,12 @@ module CleverReach
     end
 
     def uri_for(base_url, path, label:)
-      base = base_url.to_s.sub(%r{/+\z}, "")
+      base_uri = absolute_uri(base_url, label: label)
+      unless base_uri.query.nil? && base_uri.fragment.nil?
+        raise ConfigurationError, "#{label} must not include query parameters or fragments"
+      end
+
+      base = base_uri.to_s.sub(%r{/+\z}, "")
       normalized_path = path.to_s.sub(%r{\A/+}, "")
 
       absolute_uri("#{base}/#{normalized_path}", label: label)
