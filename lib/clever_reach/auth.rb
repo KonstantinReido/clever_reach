@@ -59,8 +59,9 @@ module CleverReach
         @access_token = data["access_token"]
         raise AuthenticationError, "Authentication response did not include an access token" if @access_token.to_s.strip.empty?
 
-        expires_in = data["expires_in"]&.to_i || 3600
-        @expires_at = current_time + expires_in - 60 # Refresh 1 minute early
+        expires_in = token_lifetime(data["expires_in"])
+        refresh_margin = [60, expires_in / 2].min
+        @expires_at = current_time + expires_in - refresh_margin
       else
         error_msg = "Authentication failed with status #{response.code}"
         message = ErrorParser.message(response.body)
@@ -71,6 +72,15 @@ module CleverReach
 
     def current_time
       @configuration.clock.call
+    end
+
+    def token_lifetime(value)
+      return 3600 if value.nil?
+
+      lifetime = Integer(value)
+      lifetime.positive? ? lifetime : 3600
+    rescue ArgumentError, TypeError
+      3600
     end
   end
 end

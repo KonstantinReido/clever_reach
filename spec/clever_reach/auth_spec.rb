@@ -97,6 +97,42 @@ RSpec.describe CleverReach::Auth do
       expect(WebMock).to have_requested(:post, token_url).twice
     end
 
+    it "keeps short-lived tokens valid until their clamped refresh margin" do
+      current_time = now
+      CleverReach.configuration.clock = -> { current_time }
+
+      stub_request(:post, token_url)
+        .to_return(status: 200, body: { access_token: "short", expires_in: 30 }.to_json)
+
+      expect(auth.token).to eq("short")
+      expect(auth.expires_at).to eq(now + 15)
+
+      current_time = now + 14
+      expect(auth.token).to eq("short")
+
+      expect(WebMock).to have_requested(:post, token_url).once
+    end
+
+    it "uses the default token lifetime for malformed expires_in values" do
+      CleverReach.configuration.clock = -> { now }
+
+      stub_request(:post, token_url)
+        .to_return(status: 200, body: { access_token: "default", expires_in: "not-a-number" }.to_json)
+
+      expect(auth.token).to eq("default")
+      expect(auth.expires_at).to eq(now + 3540)
+    end
+
+    it "uses the default token lifetime for non-positive expires_in values" do
+      CleverReach.configuration.clock = -> { now }
+
+      stub_request(:post, token_url)
+        .to_return(status: 200, body: { access_token: "default", expires_in: 0 }.to_json)
+
+      expect(auth.token).to eq("default")
+      expect(auth.expires_at).to eq(now + 3540)
+    end
+
     it "raises AuthenticationError for failed authentication responses" do
       stub_request(:post, token_url)
         .to_return(status: 401, body: { error: "invalid_client" }.to_json)
