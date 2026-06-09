@@ -259,6 +259,15 @@ RSpec.describe CleverReach::NetHttpClient do
       expect { client.get("/groups") }
         .to raise_error(CleverReach::APIError, /Failed to parse response:/)
     end
+
+    it "wraps TLS failures in APIError" do
+      http = instance_double(Net::HTTP)
+      allow(CleverReach::HTTP).to receive(:connection).and_return(http)
+      allow(http).to receive(:request).and_raise(OpenSSL::SSL::SSLError, "tls alert")
+
+      expect { client.get("/groups") }
+        .to raise_error(CleverReach::APIError, "Request failed: tls alert")
+    end
   end
 
   describe "#post" do

@@ -121,6 +121,15 @@ RSpec.describe CleverReach::Auth do
         .to raise_error(CleverReach::AuthenticationError, /Failed to parse authentication response:/)
     end
 
+    it "wraps TLS failures in AuthenticationError" do
+      http = instance_double(Net::HTTP)
+      allow(CleverReach::HTTP).to receive(:connection).and_return(http)
+      allow(http).to receive(:request).and_raise(OpenSSL::SSL::SSLError, "certificate verify failed")
+
+      expect { auth.token }
+        .to raise_error(CleverReach::AuthenticationError, "Failed to authenticate: certificate verify failed")
+    end
+
     it "raises AuthenticationError when a success response omits the access token" do
       stub_request(:post, token_url)
         .to_return(status: 200, body: { expires_in: 3600 }.to_json)

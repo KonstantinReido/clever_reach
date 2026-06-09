@@ -1,5 +1,6 @@
 require "net/http"
 require "json"
+require "openssl"
 require_relative "errors"
 require_relative "error_parser"
 require_relative "http"
@@ -33,7 +34,7 @@ module CleverReach
       raise
     rescue JSON::ParserError => e
       raise AuthenticationError, "Failed to parse authentication response: #{e.message}"
-    rescue IOError, SystemCallError, Timeout::Error, SocketError, Net::OpenTimeout, Net::ReadTimeout => e
+    rescue IOError, SystemCallError, Timeout::Error, SocketError, OpenSSL::SSL::SSLError, Net::OpenTimeout, Net::ReadTimeout => e
       raise AuthenticationError, "Failed to authenticate: #{e.message}"
     end
 
