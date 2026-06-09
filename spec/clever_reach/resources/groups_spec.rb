@@ -87,23 +87,33 @@ RSpec.describe CleverReach::Resources::Groups do
     expect(resource.destroy_attribute(123, 456)).to be_nil
   end
 
-  it "manages group filters" do
+  it "lists and creates group filters" do
     filter_data = { name: "Active customers" }
 
     expect(client).to receive(:get).with("/groups/123/filters", {}).and_return([])
     expect(client).to receive(:post).with("/groups/123/filters", filter_data).and_return(filter_data)
+
+    expect(resource.filters(123)).to eq([])
+    expect(resource.create_filter(123, filter_data)).to eq(filter_data)
+  end
+
+  it "finds, updates, and deletes group filters" do
+    filter_data = { name: "Active customers" }
+
     expect(client).to receive(:get).with("/groups/123/filters/456", {}).and_return(filter_data)
     expect(client).to receive(:put).with("/groups/123/filters/456", filter_data).and_return(filter_data)
     expect(client).to receive(:delete).with("/groups/123/filters/456").and_return(nil)
+
+    expect(resource.find_filter(123, 456)).to eq(filter_data)
+    expect(resource.update_filter(123, 456, filter_data)).to eq(filter_data)
+    expect(resource.destroy_filter(123, 456)).to be_nil
+  end
+
+  it "fetches group filter result summaries" do
     expect(client).to receive(:get).with("/groups/123/filters/456/count", {}).and_return(10)
     expect(client).to receive(:get).with("/groups/123/filters/456/receivers", { page: 2 }).and_return([])
     expect(client).to receive(:get).with("/groups/123/filters/456/stats", {}).and_return({})
 
-    expect(resource.filters(123)).to eq([])
-    expect(resource.create_filter(123, filter_data)).to eq(filter_data)
-    expect(resource.find_filter(123, 456)).to eq(filter_data)
-    expect(resource.update_filter(123, 456, filter_data)).to eq(filter_data)
-    expect(resource.destroy_filter(123, 456)).to be_nil
     expect(resource.filter_count(123, 456)).to eq(10)
     expect(resource.filter_receivers(123, 456, page: 2)).to eq([])
     expect(resource.filter_stats(123, 456)).to eq({})
