@@ -12,10 +12,9 @@ RSpec.describe CleverReach::Resources::Base do
       expect(path).to eq("/groups/group%201%2F2/receivers/user%40example.com")
     end
 
-    it "stringifies nil path segments" do
-      path = resource.send(:resource_path, "groups", nil)
-
-      expect(path).to eq("/groups/")
+    it "raises for nil path segments" do
+      expect { resource.send(:resource_path, "groups", nil) }
+        .to raise_error(ArgumentError, "Path segments cannot be nil")
     end
   end
 end

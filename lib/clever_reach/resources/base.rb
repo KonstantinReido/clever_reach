@@ -32,6 +32,8 @@ module CleverReach
       end
 
       def path_segment(value)
+        raise ArgumentError, "Path segments cannot be nil" if value.nil?
+
         URI.encode_www_form_component(value.to_s).gsub("+", "%20")
       end
     end
