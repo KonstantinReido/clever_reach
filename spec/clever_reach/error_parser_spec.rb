@@ -29,6 +29,22 @@ RSpec.describe CleverReach::ErrorParser do
       expect(described_class.message("plain error")).to eq("plain error")
     end
 
+    it "redacts secrets from JSON error messages" do
+      body = { "message" => "failed with access_token=abc123 and client_secret=secret123" }.to_json
+
+      expect(described_class.message(body))
+        .to eq("failed with access_token=[REDACTED] and client_secret=[REDACTED]")
+    end
+
+    it "redacts bearer tokens from non-JSON bodies" do
+      expect(described_class.message("Authorization: Bearer abc.def.ghi"))
+        .to eq("Authorization: Bearer [REDACTED]")
+    end
+
+    it "truncates long raw bodies" do
+      expect(described_class.message("x" * 600)).to eq("#{"x" * 500}...")
+    end
+
     it "returns fallback for blank bodies" do
       expect(described_class.message(" \n", "HTTP 500")).to eq("HTTP 500")
     end
