@@ -5,6 +5,7 @@ require "base64"
 require "json"
 
 token = ENV.fetch("CLEVER_REACH_TOKEN")
+print_claims = ENV["CLEVER_REACH_PRINT_TOKEN_CLAIMS"] == "1"
 
 def decode_part(part)
   Base64.urlsafe_decode64(part + ("=" * ((4 - part.length % 4) % 4)))
@@ -29,16 +30,22 @@ raise "CLEVER_REACH_TOKEN does not look like a JWT" unless header && payload
 header_decoded = JSON.parse(decode_part(header))
 payload_decoded = JSON.parse(decode_part(payload))
 
-puts "JWT header:"
-puts JSON.pretty_generate(redact_claims(header_decoded))
-
-puts
-puts "JWT payload:"
-puts JSON.pretty_generate(redact_claims(payload_decoded))
-
-puts
 puts "Summary:"
+puts "- Algorithm: #{header_decoded["alg"]}" if header_decoded.key?("alg")
+puts "- Type: #{header_decoded["typ"]}" if header_decoded.key?("typ")
 puts "- Shard: #{payload_decoded["shard"]}" if payload_decoded.key?("shard")
 puts "- Zone: #{payload_decoded["zone"]}" if payload_decoded.key?("zone")
 puts "- Scopes: #{payload_decoded["scopes"]}" if payload_decoded.key?("scopes")
 puts "- Issuer: #{payload_decoded["iss"]}" if payload_decoded.key?("iss")
+
+if print_claims
+  warn "Printing decoded JWT claims. Claims can still contain sensitive account metadata."
+
+  puts
+  puts "JWT header:"
+  puts JSON.pretty_generate(redact_claims(header_decoded))
+
+  puts
+  puts "JWT payload:"
+  puts JSON.pretty_generate(redact_claims(payload_decoded))
+end

@@ -25,11 +25,10 @@ export CLEVER_REACH_DEBUG_USER_AGENT="CleverReach Ruby Gem Debug"
 - `manual_test.rb`: manually requests a client-credentials token and calls `/groups`.
 - `test_auth.rb`: tests authentication through the gem client.
 - `compare_approaches.rb`: compares manual Net::HTTP auth with the gem client.
-- `decode_token.rb`: decodes a JWT supplied in `CLEVER_REACH_TOKEN` without printing the raw token.
+- `decode_token.rb`: decodes a JWT supplied in `CLEVER_REACH_TOKEN` and prints a summary without printing the raw token. Set `CLEVER_REACH_PRINT_TOKEN_CLAIMS=1` to print redacted decoded claims; decoded claims can still contain sensitive account metadata.
 
 Run a script with Bundler when dependencies are installed:
 
 ```sh
 bundle exec ruby debug/test_auth.rb
 ```
-
