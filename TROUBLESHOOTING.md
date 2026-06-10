@@ -60,7 +60,9 @@ request.set_form_data({
 
 response = http.request(request)
 puts "Status: #{response.code}"
-puts "Body: #{response.body}"
+data = JSON.parse(response.body) rescue {}
+puts "Token received: #{data.key?("access_token")}"
+puts "Expires in: #{data["expires_in"]} seconds" if data["expires_in"]
 ```
 
 ### Step 2: Check API Version Compatibility
