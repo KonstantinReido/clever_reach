@@ -3,6 +3,14 @@ module CleverReach
 
   class ConfigurationError < Error; end
   class AuthenticationError < Error; end
+  class TransientAuthenticationError < AuthenticationError
+    attr_reader :status_code
+
+    def initialize(message, status_code)
+      super(message)
+      @status_code = status_code
+    end
+  end
   class ValidationError < Error; end
   class NotFoundError < Error; end
   class RateLimitError < Error; end

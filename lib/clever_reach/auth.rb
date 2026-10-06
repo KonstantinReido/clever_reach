@@ -7,6 +7,10 @@ require_relative "http"
 
 module CleverReach
   class Auth
+    MAX_SERVER_RETRIES = 2
+    RETRY_BASE_DELAY = 0.1
+    MAX_RETRY_DELAY = 0.5
+
     attr_reader :access_token, :expires_at
 
     def initialize(configuration)
@@ -28,8 +32,19 @@ module CleverReach
         'client_secret' => @configuration.client_secret
       })
 
-      response = http.request(request)
-      handle_auth_response(response)
+      retries = 0
+      loop do
+        response = http.request(request)
+        begin
+          handle_auth_response(response)
+          return
+        rescue TransientAuthenticationError
+          raise if retries >= MAX_SERVER_RETRIES
+
+          sleep([RETRY_BASE_DELAY * (2**retries), MAX_RETRY_DELAY].min)
+          retries += 1
+        end
+      end
     rescue CleverReach::Error
       raise
     rescue JSON::ParserError => e
@@ -66,6 +81,11 @@ module CleverReach
         error_msg = "Authentication failed with status #{response.code}"
         message = ErrorParser.message(response.body)
         error_msg += ": #{message}" unless message.to_s.strip.empty?
+        status_code = response.code.to_i
+        if status_code >= 500 && status_code <= 599
+          raise TransientAuthenticationError.new(error_msg, status_code)
+        end
+
         raise AuthenticationError, error_msg
       end
     end

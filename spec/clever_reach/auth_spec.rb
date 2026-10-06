@@ -149,6 +149,42 @@ RSpec.describe CleverReach::Auth do
         .to raise_error(CleverReach::AuthenticationError, "Authentication failed with status 401: Credentials are invalid")
     end
 
+    it "retries a 502 response and succeeds when the provider recovers" do
+      allow(auth).to receive(:sleep)
+      stub_request(:post, token_url)
+        .to_return(
+          { status: 502, body: { error: "bad_gateway" }.to_json },
+          { status: 200, body: { access_token: "recovered", expires_in: 3600 }.to_json }
+        )
+
+      expect(auth.token).to eq("recovered")
+      expect(auth).to have_received(:sleep).with(0.1).once
+      expect(WebMock).to have_requested(:post, token_url).twice
+    end
+
+    it "raises a transient error with status after bounded retries for persistent 5xx responses" do
+      allow(auth).to receive(:sleep)
+      stub_request(:post, token_url).to_return(status: 503, body: "unavailable")
+
+      expect { auth.token }.to raise_error(CleverReach::TransientAuthenticationError) { |error|
+        expect(error.status_code).to eq(503)
+        expect(error.message).to eq("Authentication failed with status 503: unavailable")
+      }
+      expect(auth).to have_received(:sleep).with(0.1).once
+      expect(auth).to have_received(:sleep).with(0.2).once
+      expect(WebMock).to have_requested(:post, token_url).times(3)
+    end
+
+    it "does not retry 4xx authentication failures" do
+      allow(auth).to receive(:sleep)
+      stub_request(:post, token_url).to_return(status: 401, body: { error: "invalid_client" }.to_json)
+
+      expect { auth.token }
+        .to raise_error(CleverReach::AuthenticationError, "Authentication failed with status 401: invalid_client")
+      expect(auth).not_to have_received(:sleep)
+      expect(WebMock).to have_requested(:post, token_url).once
+    end
+
     it "raises AuthenticationError for invalid JSON success responses" do
       stub_request(:post, token_url)
         .to_return(status: 200, body: "not json")
